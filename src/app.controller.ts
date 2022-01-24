@@ -6,19 +6,19 @@ import {
   Render,
   StreamableFile,
 } from '@nestjs/common';
-import { DashaAcc } from './dasha.service';
 import { Scraper } from './scraper.service';
 import { Urltype } from './urltype';
-import { tts } from '@dasha.ai/sdk';
-import * as fs from 'fs/promises';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 import { randomUUID } from 'crypto';
 import { TtsService } from './tts.service';
+import { StorageService } from './storage.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly tts: TtsService) {}
+  constructor(
+    private readonly tts: TtsService,
+    private readonly scraper: Scraper,
+    private readonly storage: StorageService,
+  ) {}
 
   @Get()
   @Render('index')
@@ -35,12 +35,10 @@ export class AppController {
         : hostname === 'medium.com'
         ? Urltype.MEDIUM
         : Urltype.OTHER;
-    const synthesized = await this.tts.textToSpeech(url, type);
+    const text = await this.scraper.scrapeUrl(url, type);
+    const synthesized = await this.tts.textToSpeech(text);
     const uuid = randomUUID();
-    await fs.writeFile(join(process.cwd(), 'data', uuid), synthesized, {
-      flag: 'w+',
-    });
-    const data = createReadStream(join(process.cwd(), 'data', uuid));
-    return new StreamableFile(data);
+    await this.storage.writeFile(synthesized, uuid);
+    return new StreamableFile(this.storage.getFileStream(uuid));
   }
 }

@@ -1,18 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DashaAcc } from './dasha.service';
 import { tts } from '@dasha.ai/sdk';
-import { Urltype } from './urltype';
-import { Scraper } from './scraper.service';
 
 @Injectable()
 export class TtsService {
-  constructor(
-    private readonly dashaApp: DashaAcc,
-    private readonly scraper: Scraper,
-  ) {}
-  async textToSpeech(url: string, type: Urltype): Promise<Uint8Array> {
+  constructor(private readonly dashaApp: DashaAcc) {}
+  async textToSpeech(text: string): Promise<Uint8Array> {
     return await tts.synthesize(
-      await this.scraper.scrapeUrl(url, type),
+      text,
       {
         speaker: 'kate',
         lang: 'en-US',
