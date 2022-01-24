@@ -20,6 +20,6 @@ export class Scraper {
         : type === Urltype.MEDIUM
         ? $('article p')
         : $('body p');
-    return el.text().substring(0, 1000);
+    return el.text();
   }
 }
