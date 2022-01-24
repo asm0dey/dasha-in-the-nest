@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import puppeteer from 'puppeteer/lib/cjs/puppeteer/node-puppeteer-core';
 import * as cheerio from 'cheerio';
-import { Urltype } from './urltype';
 
 @Injectable()
 export class Scraper {
-  async scrapeUrl(url: string, type: Urltype) {
+  async scrapeUrl(url: string, type: 'wikipedia' | 'medium' | 'other') {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     const nav = page.waitForNavigation();
@@ -15,9 +14,9 @@ export class Scraper {
     const content = await page.content();
     const $ = cheerio.load(content);
     const el =
-      type === Urltype.WIKIPEDIA
+      type === 'wikipedia'
         ? $('div#mw-content-text p')
-        : type === Urltype.MEDIUM
+        : type === 'medium'
         ? $('article p')
         : $('body p');
     return el.text();
