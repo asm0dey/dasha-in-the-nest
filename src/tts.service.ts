@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DashaAcc } from './dasha.service';
+import { DashaAcc } from './dashaacc.service';
 import { tts } from '@dasha.ai/sdk';
 
 @Injectable()
@@ -7,7 +7,7 @@ export class TtsService {
   constructor(private readonly dashaApp: DashaAcc) {}
   async textToSpeech(text: string): Promise<Uint8Array> {
     return await tts.synthesize(
-      text,
+      process.env['DASHA_TEXT_MESSAGE'] ?? text,
       {
         speaker: 'kate',
         lang: 'en-US',
